@@ -27,6 +27,30 @@ from pyknon.music import NoteSeq
 #           - note -> B
 #           - note -> etc...
 
+def pix2noteseq(pixelmap):
+    """
+    Convert a PIL pixel map to a PyKnon NoteSeq
+
+    Use:
+        pix2noteseq(pixelmap)
+
+    Arguemnts:
+        pixelmap: the PIL pixel map of the image
+
+    This function presumes the pixel map is in RGB and correct behavior when
+    otherwise is not at all guaranteed.
+    """
+    width, height = pixelmap.size
+    notes = NoteSeq()
+    
+    # Iterate over the pixels, starting at the top left and working
+    # colomn by colomn
+    for y in range(height):
+        for x in range(width):
+            notes.append(pix2note(pixelmap[x,y]))
+
+    return notes
+
 if __name__ == "__main__":
 
     # mode == '-i' | '-m'
