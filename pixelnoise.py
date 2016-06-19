@@ -45,12 +45,11 @@ def pix2note(pixel):
         pixel: a 3-uple representing the RGB values of the pixel
     """
     letters = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
-    print(pixel)
     r, g, b = pixel
 
-    # Red is the duration in beats, a full red value (of 255) will last 16
-    # beats, or 4 measures of 4:4
-    duration = r / 16
+    # Red is the duration in beats, a full red value (of 255) will last 4
+    # beats, or one measure of 4:4
+    duration = r / 64
 
     # Green is the octave number, it is calculated assuming 8 octaves (from 0
     # to 7)
@@ -87,6 +86,8 @@ def pix2noteseq(pixelmap, width, height):
     for y in range(height):
         for x in range(width):
             notes.append(pix2note(pixelmap[x,y]))
+            if y == math.ceil(height/2) and x == math.ceil(width/2):
+                print("50% done...")
 
     return notes
 
@@ -103,10 +104,21 @@ if __name__ == "__main__":
     if mode == '-i':
         image = Image.open(filepath)
         width, height = image.size
+        print("size: {0} * {1}".format(width, height))
         pixels = image.load()
 
         # Main Loop, generates notes from pixel RGB values
+        print("Generating note sequence...")
         notes = pix2noteseq(pixels, width, height)
+
+        # Generate and write the midi file to disk
+        print("Generating the Midi file...")
+        midi = Midi(number_tracks=1, tempo=90)
+        midi.seq_notes(notes, track=0)
+        print("Writing Midi file...")
+        midi.write(sys.argv[2][:-3] + 'mid')
+
+        print("Done.")
 
     elif mode == '-m':
         # TODO
