@@ -1,10 +1,13 @@
 #! /usr/local/bin/python3
 import sys
+import math
 
 from pyknon.genmidi import Midi
 from pyknon.music import Note
 from pyknon.music import Rest
 from pyknon.music import NoteSeq
+
+from PIL import Image
 
 # TODO: 
 #   * add commandline argument support (ie *i for image *> midi, *m for midi *>
@@ -26,8 +29,43 @@ from pyknon.music import NoteSeq
 #           - note -> G
 #           - note -> B
 #           - note -> etc...
+def pix2note(pixel):
+    """
+    Converts an RGB pixel into a PyKnon Note
 
-def pix2noteseq(pixelmap):
+    Red -> duration
+    Green -> octave
+    Blue -> exact note
+    Overall Brightness -> volume
+
+    Use:
+        pix2note(pixel)
+
+    Arguments:
+        pixel: a 3-uple representing the RGB values of the pixel
+    """
+    letters = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+    print(pixel)
+    r, g, b = pixel
+
+    # Red is the duration in beats, a full red value (of 255) will last 16
+    # beats, or 4 measures of 4:4
+    duration = r / 16
+
+    # Green is the octave number, it is calculated assuming 8 octaves (from 0
+    # to 7)
+    octave = g // 32 + 1
+
+    # Blue is the note letter
+    letter = letters[math.floor(b // (256 / 12))]
+
+    # Overall Brightness is the volume
+    volume = 0.375*r + 0.5*g + 0.125*b
+
+    return Note(letter + str(octave), duration)
+
+
+def pix2noteseq(pixelmap, width, height):
     """
     Convert a PIL pixel map to a PyKnon NoteSeq
 
@@ -36,11 +74,12 @@ def pix2noteseq(pixelmap):
 
     Arguemnts:
         pixelmap: the PIL pixel map of the image
+        width: the width in pixels
+        height: height in pixels
 
     This function presumes the pixel map is in RGB and correct behavior when
     otherwise is not at all guaranteed.
     """
-    width, height = pixelmap.size
     notes = NoteSeq()
     
     # Iterate over the pixels, starting at the top left and working
@@ -59,14 +98,15 @@ if __name__ == "__main__":
     if mode not in modes:
         raise Exception('wrong mode')
 
-    filepath = sys.argv[1]
+    filepath = sys.argv[2]
 
     if mode == '-i':
         image = Image.open(filepath)
+        width, height = image.size
         pixels = image.load()
 
         # Main Loop, generates notes from pixel RGB values
-        notes = pix2noteseq(pixels)
+        notes = pix2noteseq(pixels, width, height)
 
     elif mode == '-m':
         # TODO
