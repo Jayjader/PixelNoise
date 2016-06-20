@@ -10,18 +10,12 @@ from pyknon.music import NoteSeq
 from PIL import Image
 
 # TODO: 
-#   * add commandline argument support (ie *i for image *> midi, *m for midi *>
-#   image)
+#   * add commandline argument support (ie -i for image -> midi, -m for midi ->
+#   image, -l to limit the maximum number of notes)
 #
 #   * add error handling
 #
 #   * implement auxilary functions:
-#       - pix2noteseq:
-#           - pix2note:
-#               - blue -> note letter
-#               - green -> octave
-#               - red -> length
-#               - brightness -> volume
 #       - note -> pixel:
 #           /!\ Important prerequisite: figure out how to open & read a midi
 #           file in python /!\
